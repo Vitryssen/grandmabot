@@ -9,7 +9,7 @@ import datetime
 from datetime import datetime, timedelta
 import asyncio
 
-
+myChannelId = 615624019961708566 #Set channel where task is going to run
 bot = commands.Bot(command_prefix='.')
 
 grandsons = {
@@ -19,7 +19,7 @@ grandsons = {
 async def background_checkReminders(self):
         await self.wait_until_ready()
         rem = ""
-        channel = self.get_channel(615624019961708566) # channel ID goes here
+        channel = self.get_channel(myChannelId)
         while not self.is_closed():
             time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now())
             for users in grandsons:
@@ -29,7 +29,7 @@ async def background_checkReminders(self):
             if(len(rem) > 0):
                 await channel.send(rem)
                 rem = ""
-            await asyncio.sleep(1) # task runs every 60 seconds
+            await asyncio.sleep(1)
 
 @bot.event
 async def on_ready():
@@ -43,8 +43,6 @@ async def on_ready():
 async def on_message(message):
     if message.author == bot.user:
         return
-        #schedthread = threading.Thread(target=reminders.checkReminders, args=(grandsons,))
-        #schedthread.start()
     print(message.channel.id)
     await bot.process_commands(message)
 
@@ -95,7 +93,7 @@ async def users(ctx):
         time = '{:%Y:%m:%d} '.format(grandsons[users].time)+' {:%H:%M:%S}'.format(grandsons[users].time)
         await ctx.send(time)
 
-@bot.command() #Change img and gif to use urls instead of downloading
+@bot.command()
 async def img(ctx, arg1):
     """Searches for an image"""
     page = random.randint(0, 5)
