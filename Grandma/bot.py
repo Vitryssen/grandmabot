@@ -4,6 +4,7 @@ import random
 import getWebsite
 import sys
 import getUrls
+import userClasses
 
 bot = commands.Bot(command_prefix='.')
 
@@ -36,6 +37,11 @@ async def roll(ctx, dice: str):
         return
 
     result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
+    await ctx.send(result)
+
+@bot.command()
+async def reminder(ctx, arg1, arg2):
+    """Sets a reminder for a given amount of time"""
     await ctx.send(result)
 
 @bot.command() #Change img and gif to use urls instead of downloading
@@ -72,4 +78,4 @@ async def joined(ctx, member: discord.Member):
     """Says when a member joined."""
     await ctx.send('{0.name} joined, grab a cookie!'.format(member))
 
-bot.run('NDcwNTgyNDM4Mjk3NjAwMDAx.Xh3Huw.rGMhPlY_q9vnQKn1ElxHDTl6eOw')
+bot.run('token')
