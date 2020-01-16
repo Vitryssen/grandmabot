@@ -72,4 +72,4 @@ async def joined(ctx, member: discord.Member):
     """Says when a member joined."""
     await ctx.send('{0.name} joined, grab a cookie!'.format(member))
 
-bot.run('NDcwNTgyNDM4Mjk3NjAwMDAx.Xh3Huw.rGMhPlY_q9vnQKn1ElxHDTl6eOw')
+bot.run('token')
