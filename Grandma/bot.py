@@ -5,10 +5,14 @@ import getWebsite
 import sys
 import getUrls
 import userClasses
+import datetime
+from datetime import datetime, timedelta
 
 bot = commands.Bot(command_prefix='.')
 
-grandsons = []
+grandsons = {
+
+}
 
 @bot.event
 async def on_ready():
@@ -42,20 +46,27 @@ async def roll(ctx, dice: str):
 @bot.command()
 async def reminder(ctx, arg1, arg2):
     """Sets a reminder for a given amount of time"""
-    if isinstance(arg2, int):
-        embed = discord.Embed()
-        embed.title = "Reminder set"
-        embed.add_field(name="Reminder", value=arg1)
-        embed.add_field(name="Set for", value=arg2)
-        embed.set_footer(text=("Requested by "+ctx.message.author.name), icon_url=ctx.message.author.avatar_url)
-        grandsons.append(userClasses.Grandson(ctx.message.author.name, ctx.message.author.id))
-        await ctx.send(embed=embed)
-    else:
+    try:
+        arg2 = int(arg2)
+    except:
         await ctx.send("Invalid value for time")
+    else:
+        if isinstance(arg2, int):
+            embed = discord.Embed()
+            embed.title = "Reminder set"
+            embed.add_field(name="Reminder", value=arg1)
+            embed.add_field(name="Set for", value=("{} minutes").format(arg2))
+            embed.set_footer(text=("Requested by "+ctx.message.author.name), icon_url=ctx.message.author.avatar_url)
+            grandsons[ctx.message.author.id] = userClasses.Grandson(ctx.message.author.name, ctx.message.author.id)
+            grandsons[ctx.message.author.id].time = datetime.now()+timedelta(minutes=arg2)
+            await ctx.send(embed=embed)
 
 @bot.command()
 async def users(ctx):
-    await ctx.send(((d.name, d.id) for d in grandsons))
+    for users in grandsons:
+        time = '{:%Y:%m:%d} '.format(grandsons[users].time)+' {:%H:%M:%S}'.format(grandsons[users].time)
+        await ctx.send(time)
+
 @bot.command() #Change img and gif to use urls instead of downloading
 async def img(ctx, arg1):
     """Searches for an image"""
