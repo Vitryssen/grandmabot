@@ -6,3 +6,4 @@ class Grandson:
         self.timer = 0
         self.love = 0
         self.requests = 0
+        self.reminder = ""

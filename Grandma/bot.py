@@ -7,12 +7,29 @@ import getUrls
 import userClasses
 import datetime
 from datetime import datetime, timedelta
+import asyncio
+
 
 bot = commands.Bot(command_prefix='.')
 
 grandsons = {
 
 }
+
+async def background_checkReminders(self):
+        await self.wait_until_ready()
+        rem = ""
+        channel = self.get_channel(615624019961708566) # channel ID goes here
+        while not self.is_closed():
+            time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now())
+            for users in grandsons:
+                if grandsons[users].time == time:
+                    rem = grandsons[users].reminder
+                    break
+            if(len(rem) > 0):
+                await channel.send(rem)
+                rem = ""
+            await asyncio.sleep(1) # task runs every 60 seconds
 
 @bot.event
 async def on_ready():
@@ -21,6 +38,15 @@ async def on_ready():
     print(bot.user.id)
     print('------')
     await bot.change_presence(activity=discord.Game(name=".help for commands"))
+
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return
+        #schedthread = threading.Thread(target=reminders.checkReminders, args=(grandsons,))
+        #schedthread.start()
+    print(message.channel.id)
+    await bot.process_commands(message)
 
 @bot.command()
 async def urban(ctx, arg1):
@@ -58,7 +84,9 @@ async def reminder(ctx, arg1, arg2):
             embed.add_field(name="Set for", value=("{} minutes").format(arg2))
             embed.set_footer(text=("Requested by "+ctx.message.author.name), icon_url=ctx.message.author.avatar_url)
             grandsons[ctx.message.author.id] = userClasses.Grandson(ctx.message.author.name, ctx.message.author.id)
-            grandsons[ctx.message.author.id].time = datetime.now()+timedelta(minutes=arg2)
+            time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now()+timedelta(minutes=arg2))
+            grandsons[ctx.message.author.id].time = time
+            grandsons[ctx.message.author.id].reminder = arg1
             await ctx.send(embed=embed)
 
 @bot.command()
@@ -70,7 +98,7 @@ async def users(ctx):
 @bot.command() #Change img and gif to use urls instead of downloading
 async def img(ctx, arg1):
     """Searches for an image"""
-    page = random.randint(0, 10)
+    page = random.randint(0, 5)
     resp = getUrls.extract_images(arg1, page, 'photo')
     if resp != False:
         embed = discord.Embed()
@@ -84,7 +112,7 @@ async def img(ctx, arg1):
 @bot.command()
 async def gif(ctx, arg1):
     """Searches for a gif"""
-    page = random.randint(0, 10)
+    page = random.randint(0, 5)
     resp = getUrls.extract_images(arg1, page, 'animated')
     embed = discord.Embed()
     if resp != False:
@@ -101,6 +129,9 @@ async def joined(ctx, member: discord.Member):
     """Says when a member joined."""
     await ctx.send('{0.name} joined, grab a cookie!'.format(member))
 
-file = open('token', 'r')
+path = '../../token' #Set path where your file with token is
+file = open(path, 'r')
 token = file.readline().rstrip()
+
+bot.loop.create_task(background_checkReminders(bot))
 bot.run(token)
