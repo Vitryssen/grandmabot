@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import asyncio
 
 lastChannelId = ""
-bot = commands.Bot(command_prefix='-')
+bot = commands.Bot(command_prefix='.')
 
 grandsons = {
 
