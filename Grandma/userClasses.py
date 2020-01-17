@@ -7,3 +7,4 @@ class Grandson:
         self.love = 0
         self.requests = 0
         self.reminder = ""
+        self.reminderChannel = ""
