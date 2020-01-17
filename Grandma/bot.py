@@ -19,7 +19,6 @@ grandsons = {
 async def background_checkReminders(self):
         await self.wait_until_ready()
         rem = ""
-        global lastChannelId
         while not self.is_closed():
             time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now())
             for users in grandsons:
@@ -41,10 +40,8 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    global lastChannelId
     if message.author == bot.user:
         return
-    lastChannelId = message.channel.id
     await bot.process_commands(message)
 
 @bot.command()
