@@ -41,6 +41,7 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    global lastChannelId
     if message.author == bot.user:
         return
     lastChannelId = message.channel.id
