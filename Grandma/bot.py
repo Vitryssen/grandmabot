@@ -9,7 +9,7 @@ import datetime
 from datetime import datetime, timedelta
 import asyncio
 
-myChannelId = 615624019961708566 #Set channel where task is going to run
+lastChannelId = ""
 bot = commands.Bot(command_prefix='.')
 
 grandsons = {
@@ -19,16 +19,16 @@ grandsons = {
 async def background_checkReminders(self):
         await self.wait_until_ready()
         rem = ""
-        channel = self.get_channel(myChannelId)
+        global lastChannelId
         while not self.is_closed():
             time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now())
             for users in grandsons:
                 if grandsons[users].time == time:
                     rem = grandsons[users].reminder
-                    break
-            if(len(rem) > 0):
-                await channel.send(rem)
-                rem = ""
+                    if(len(rem) > 0):
+                        channel = self.get_channel(grandsons[users].reminderChannel)
+                        await channel.send("Reminder for user {}, {}".format(grandsons[users].name,rem))
+                        rem = ""
             await asyncio.sleep(1)
 
 @bot.event
@@ -43,7 +43,7 @@ async def on_ready():
 async def on_message(message):
     if message.author == bot.user:
         return
-    print(message.channel.id)
+    lastChannelId = message.channel.id
     await bot.process_commands(message)
 
 @bot.command()
@@ -85,6 +85,7 @@ async def reminder(ctx, arg1, arg2):
             time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now()+timedelta(minutes=arg2))
             grandsons[ctx.message.author.id].time = time
             grandsons[ctx.message.author.id].reminder = arg1
+            grandsons[ctx.message.author.id].reminderChannel = ctx.message.channel.id
             await ctx.send(embed=embed)
 
 @bot.command()
