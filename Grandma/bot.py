@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import asyncio
 
 lastChannelId = ""
-bot = commands.Bot(command_prefix='.')
+bot = commands.Bot(command_prefix='-')
 
 grandsons = {
 
@@ -52,6 +52,7 @@ async def urban(ctx, arg1):
         await ctx.send(embed=embed)
     except:
         await ctx.send(await ctx.send("Not enough love from my grandchildren to perform request :frowning:"))
+    await ctx.message.delete()
 
 @bot.command()
 async def roll(ctx, dice: str):
@@ -64,9 +65,10 @@ async def roll(ctx, dice: str):
 
     result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
     await ctx.send(result)
+    await ctx.message.delete()
 
 @bot.command()
-async def reminder(ctx, arg1, arg2):
+async def reminder(ctx, arg1, arg2, arg3='m'):
     """Sets a reminder for a given amount of time"""
     try:
         arg2 = int(arg2)
@@ -77,20 +79,29 @@ async def reminder(ctx, arg1, arg2):
             embed = discord.Embed()
             embed.title = "Reminder set"
             embed.add_field(name="Reminder", value=arg1)
-            embed.add_field(name="Set for", value=("{} minutes").format(arg2))
             embed.set_footer(text=("Requested by "+ctx.message.author.name), icon_url=ctx.message.author.avatar_url)
             grandsons[ctx.message.author.id] = userClasses.Grandson(ctx.message.author.name, ctx.message.author.id)
-            time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now()+timedelta(minutes=arg2))
+            if(arg3 == 's'):
+                time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now()+timedelta(seconds=arg2))
+                embed.add_field(name="Set for", value=("{} seconds").format(arg2))
+            elif(arg3 == 'h'):
+                time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now()+timedelta(hours=arg2))
+                embed.add_field(name="Set for", value=("{} hours").format(arg2))
+            elif(arg3 == 'm'):
+                time = '{:%Y:%m:%d %H:%M:%S}'.format(datetime.now()+timedelta(minutes=arg2))
+                embed.add_field(name="Set for", value=("{} minutes").format(arg2))
             grandsons[ctx.message.author.id].time = time
             grandsons[ctx.message.author.id].reminder = arg1
             grandsons[ctx.message.author.id].reminderChannel = ctx.message.channel.id
             await ctx.send(embed=embed)
+    await ctx.message.delete()
 
 @bot.command()
 async def users(ctx):
     for users in grandsons:
         time = '{:%Y:%m:%d} '.format(grandsons[users].time)+' {:%H:%M:%S}'.format(grandsons[users].time)
         await ctx.send(time)
+    await ctx.message.delete()
 
 @bot.command()
 async def img(ctx, arg1):
@@ -105,6 +116,7 @@ async def img(ctx, arg1):
         await ctx.send(embed=embed)
     else:
         await ctx.send("Not enough love from my grandchildren to perform request :frowning:")
+    await ctx.message.delete()
 
 @bot.command()
 async def gif(ctx, arg1):
@@ -120,6 +132,7 @@ async def gif(ctx, arg1):
     else:
         embed = "Not enough love from my grandchildren to perform request frowning"
         await ctx.send(embed=embed)
+    await ctx.message.delete()
 
 @bot.command()
 async def joined(ctx, member: discord.Member):
