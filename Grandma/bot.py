@@ -8,6 +8,7 @@ import userClasses
 import datetime
 from datetime import datetime, timedelta
 import asyncio
+import reminders
 
 lastChannelId = ""
 bot = commands.Bot(command_prefix='.')
@@ -30,6 +31,16 @@ async def background_checkReminders(self):
                         rem = ""
             await asyncio.sleep(1)
 
+async def background_sendRandomReminder(self):
+    await self.wait_until_ready()
+    while not self.is_closed():
+        if len(str(reminders.channelId)) > 0:
+            randomReminder = random.randint(0, len(reminders.reminderValues)-1)
+            channel = self.get_channel(reminders.channelId)
+            print(randomReminder)
+            await channel.send('{}'.format(reminders.reminderValues[randomReminder]))
+        await asyncio.sleep(random.randint(1800, 3600))
+
 @bot.event
 async def on_ready():
     print('Logged in as')
@@ -43,6 +54,18 @@ async def on_message(message):
     if message.author == bot.user:
         return
     await bot.process_commands(message)
+
+@bot.command()
+async def reminderchannel(ctx):
+    """Use this command on the channel where you want the reminders from Grandma"""
+    reminders.channelId = ctx.message.channel.id
+    await ctx.message.delete()
+
+@bot.command()
+async def addReminder(ctx, arg1):
+    """Add a reminder to the list of reminders"""
+    reminders.reminderValues.append(arg1)
+    await ctx.message.delete()
 
 @bot.command()
 async def urban(ctx, arg1):
@@ -65,7 +88,6 @@ async def roll(ctx, dice: str):
 
     result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
     await ctx.send(result)
-    await ctx.message.delete()
 
 @bot.command()
 async def reminder(ctx, arg1, arg2, arg3='m'):
@@ -94,13 +116,6 @@ async def reminder(ctx, arg1, arg2, arg3='m'):
             grandsons[ctx.message.author.id].reminder = arg1
             grandsons[ctx.message.author.id].reminderChannel = ctx.message.channel.id
             await ctx.send(embed=embed)
-    await ctx.message.delete()
-
-@bot.command()
-async def users(ctx):
-    for users in grandsons:
-        time = '{:%Y:%m:%d} '.format(grandsons[users].time)+' {:%H:%M:%S}'.format(grandsons[users].time)
-        await ctx.send(time)
     await ctx.message.delete()
 
 @bot.command()
@@ -144,4 +159,5 @@ file = open(path, 'r')
 token = file.readline().rstrip()
 
 bot.loop.create_task(background_checkReminders(bot))
+bot.loop.create_task(background_sendRandomReminder(bot))
 bot.run(token)
